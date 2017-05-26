@@ -19,8 +19,12 @@ export default {
       foo: '温洵',
       zoom: false, // 点击放大图片的状态，ture为默认缩小，false为放大
       pics: [], // 图片数据,
-      images: []
+      images: [],
+      auth: ''
     }
+  },
+  created () {
+    this.auth = prompt('请输入密码')
   },
   methods: {
     imgZoom (evt) {
@@ -39,7 +43,7 @@ export default {
       var preImages = 'DSC'
       var startNumber = 320
       var endNumber = 500
-      var preUrl = '/static/images/'
+      var preUrl = 'static/images/'
       var tempNumber = ''
       var result = []
       var times = [{
@@ -89,7 +93,24 @@ export default {
     }
   },
   mounted () {
-    this.buidImageData()
+    (function (self) {
+      var number = 0
+      function validate () {
+        if (self.auth === '20170507') {
+          self.buidImageData()
+        } else {
+          alert('输入的密码不正确，请重新输入')
+          self.auth = prompt('请输入密码')
+          number++
+          if (number < 3) {
+            validate()
+          } else {
+            self.foo = '无权访问！！'
+          }
+        }
+      }
+      validate()
+    })(this)
   }
 }
 </script>
