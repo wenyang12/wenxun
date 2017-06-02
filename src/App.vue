@@ -1,30 +1,41 @@
 <template>
   <section class='wrapper'>
-  <header>{{foo}}</header>
-  <article>
-    <dl v-for="item in pics" class="image-model">
-        <dt>{{item.time}}</dt>
-        <dd><img v-for="v in item.images" :src="v" @click="imgZoom" @error="imgError"></dd>
-    </dl>
-  </article>
-  <div class='mask' v-show="zoom"></div>
+    <header>{{title}}</header>
+    <section class='layout'>
+      <article class='layout-left'>
+        <dl v-for="item in pics" class="image-model" :key="item.key">
+            <dt>{{item.time}}</dt>
+            <dd><img v-for="v in item.images" :src="v" @click="imgZoom" @error="imgError"></dd>
+        </dl>
+      </article>
+      <article class='layout-right'>
+        <h4 @click="videoSplice">{{videotext}}</h4>
+        <video v-for="v in videodata" width="320" height="240" :key="v.key" controls="controls">
+        <source :src="v.src" type="video/mp4">
+        Your browser does not support the video tag.
+        </video>
+      </article>
+    </section>
+    <div class='mask' v-show="zoom"></div>
   </section>
 </template>
 
 <script>
+import vedioList from '@/data/video'
+import times from '@/data/times'
+let tempVideoData = vedioList.slice()
 export default {
   name: 'app',
   data () {
     return {
-      foo: '温洵',
+      title: '温洵',
+      videotext: '换一些视频',
       zoom: false, // 点击放大图片的状态，ture为默认缩小，false为放大
       pics: [], // 图片数据,
       images: [],
-      auth: ''
+      auth: '',
+      videodata: []
     }
-  },
-  created () {
-    this.auth = prompt('请输入密码')
   },
   methods: {
     imgZoom (evt) {
@@ -46,41 +57,14 @@ export default {
       var preUrl = 'static/images/'
       var tempNumber = ''
       var result = []
-      var times = [{
-        time: '2017-5-10',
-        number: 6
-      }, {
-        time: '2017-5-11',
-        number: 4
-      }, {
-        time: '2017-5-12',
-        number: 6
-      }, {
-        time: '2017-5-13',
-        number: 9
-      }, {
-        time: '2017-5-14',
-        number: 1
-      }, {
-        time: '2017-5-15',
-        number: 5
-      }, {
-        time: '2017-5-18',
-        number: 7
-      }, {
-        time: '2017-5-19',
-        number: 5
-      }, {
-        time: '2017-5-20',
-        number: 1
-      }]
       for (; startNumber < endNumber; startNumber++) {
         // 构建为5位数
         tempNumber = (Array(5).join(0) + startNumber).slice(-5)
         this.images.push(`${preUrl}${preImages}${tempNumber}.JPG`)
       }
-      times.forEach(function (item) {
+      times.forEach(function (item, index) {
         result.push({
+          key: index,
           time: item.time,
           images: self.images.splice(0, item.number)
         })
@@ -90,22 +74,34 @@ export default {
     imgError (evt) {
       var target = evt.currentTarget
       target.style.display = 'none'
+    },
+    videoSplice () {
+      if (this.auth === '20170507') {
+        if (tempVideoData.length) {
+          this.videodata = tempVideoData.splice(0, 3)
+        } else {
+          alert('没视频了,重头开始')
+          tempVideoData = vedioList.slice()
+          this.videodata = tempVideoData.splice(0, 3)
+        }
+      }
     }
   },
-  mounted () {
+  created () {
     (function (self) {
       var number = 0
       function validate () {
         if (self.auth === '20170507') {
           self.buidImageData()
+          self.videoSplice()
         } else {
-          alert('输入的密码不正确，请重新输入')
           self.auth = prompt('请输入密码')
           number++
           if (number < 3) {
             validate()
           } else {
-            self.foo = '无权访问！！'
+            self.title = '无权访问！！'
+            self.videotext = ''
           }
         }
       }
@@ -119,6 +115,26 @@ export default {
 @import '~@/assets/style/all';
 .wrapper{
   padding:1rem;
+}
+.layout{
+  display:flex;
+  align-items: flex-start;
+}
+.layout-right{
+  h4{
+    text-align:center;
+    padding:5px;
+    cursor:pointer;
+    color:#999;
+    font-weight:normal;
+    border-radius:5px;
+    border:1px solid #ddd;
+    background-color:#f2f2f2;
+    &:hover{
+      background-color:#fbfbfb;
+    }
+    margin-bottom:0.5rem;
+  }
 }
 header{
   padding-bottom:1rem;
