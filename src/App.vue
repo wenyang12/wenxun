@@ -3,13 +3,13 @@
     <header>{{title}}</header>
     <section class='layout'>
       <article class='layout-left'>
-        <dl v-for="item in pics" class="image-model" :key="item.key">
+        <dl v-for="(item, indexa) in imgdata" class="image-model" :key="indexa">
             <dt>{{item.time}}</dt>
-            <dd><img v-for="v in item.images" :src="v" @click="imgZoom" @error="imgError"></dd>
+            <dd><img v-for="(v, indexb) in item.images" :class="'img-'+indexa+'-'+indexb" :src="v" @click="imgZoom" @error="imgError"></dd>
         </dl>
       </article>
       <article class='layout-right'>
-        <h4 @click="videoSplice">{{videotext}}</h4>
+        <h4 @click="renderVideoAndImg">{{videotext}}</h4>
         <video v-for="v in videodata" width="320" height="240" :key="v.key" controls="controls">
         <source :src="v.src" type="video/mp4">
         Your browser does not support the video tag.
@@ -22,19 +22,19 @@
 
 <script>
 import vedioList from '@/data/video'
-import times from '@/data/times'
+import images from '@/data/images'
 let tempVideoData = vedioList.slice()
+let tempimgdata = images.slice()
 export default {
   name: 'app',
   data () {
     return {
       title: '温洵',
-      videotext: '换一些视频',
+      videotext: '换一换',
       zoom: false, // 点击放大图片的状态，ture为默认缩小，false为放大
-      pics: [], // 图片数据,
-      images: [],
-      auth: '',
-      videodata: []
+      imgdata: [], // 图片数据,
+      videodata: [], // 视频数据
+      auth: ''
     }
   },
   methods: {
@@ -48,41 +48,25 @@ export default {
         this.zoom = false
       }
     },
-    // 构建图片数据
-    buidImageData () {
-      var self = this
-      var preImages = 'DSC'
-      var startNumber = 320
-      var endNumber = 500
-      var preUrl = 'static/images/'
-      var tempNumber = ''
-      var result = []
-      for (; startNumber < endNumber; startNumber++) {
-        // 构建为5位数
-        tempNumber = (Array(5).join(0) + startNumber).slice(-5)
-        this.images.push(`${preUrl}${preImages}${tempNumber}.JPG`)
-      }
-      times.forEach(function (item, index) {
-        result.push({
-          key: index,
-          time: item.time,
-          images: self.images.splice(0, item.number)
-        })
-      })
-      this.pics = result
-    },
     imgError (evt) {
       var target = evt.currentTarget
       target.style.display = 'none'
     },
-    videoSplice () {
+    renderVideoAndImg () {
       if (this.auth === '20170507') {
         if (tempVideoData.length) {
           this.videodata = tempVideoData.splice(0, 3)
         } else {
-          alert('没视频了,重头开始')
+          alert('没视频了,视频重头开始！')
           tempVideoData = vedioList.slice()
           this.videodata = tempVideoData.splice(0, 3)
+        }
+        if (tempimgdata.length) {
+          this.imgdata = tempimgdata.splice(0, 3)
+        } else {
+          alert('没图片了,图片重头开始！')
+          tempimgdata = vedioList.slice()
+          this.imgdata = tempimgdata.splice(0, 3)
         }
       }
     }
@@ -92,8 +76,7 @@ export default {
       var number = 0
       function validate () {
         if (self.auth === '20170507') {
-          self.buidImageData()
-          self.videoSplice()
+          self.renderVideoAndImg()
         } else {
           self.auth = prompt('请输入密码')
           number++
@@ -123,11 +106,16 @@ export default {
 .layout-right{
   h4{
     text-align:center;
-    padding:5px;
+    margin: 0 auto;
     cursor:pointer;
     color:#999;
+    width: 60/25rem;
+    height: 60/25rem;
+    line-height: 60/25rem;
+    font-size: 14/25rem;
     font-weight:normal;
-    border-radius:5px;
+    border-radius:50%;
+    box-shadow: 0 0 50px 3px rgba(0,0,0,.2);
     border:1px solid #ddd;
     background-color:#f2f2f2;
     &:hover{
@@ -143,7 +131,8 @@ header{
   display:flex;
   margin-bottom:10px;
   dt{
-    flex:0 0 2.5rem;
+    flex:0 0 90/25rem;
+    font-size: 14/25rem;
     position:relative;
     margin-right: 0.5rem;
   }
